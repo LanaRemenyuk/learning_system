@@ -76,11 +76,18 @@ class WatchedViewSet(viewsets.ModelViewSet):
 
 def get_stat(request):
     total_watched = Lesson.objects.filter(watched__if_watched='True').count()
-    total_students = Product.objects.all().aggregate(Count('subscriber'))
+    #total_students = Product.objects.all().aggregate(Count('subscriber')).values
+    total_students = Product.objects.filter(subscriber__product=True).count()
+    users_number = CustomUser.objects.count()
+    sales_percentage = round(total_students/users_number*100)
+    #time_spent =Lesson.objects.filter(sum(watched__time=sum()))
     response = {
+        #'product_name': product_name,
         'total_watched': total_watched,
-        'total_students': total_students
-
+        'total_students': total_students,
+        'users_number': users_number,
+        'sales_percentage': sales_percentage,
+        #'time_spent': time_spent
     }
 
     return JsonResponse(response)
