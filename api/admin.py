@@ -15,6 +15,7 @@ class LessonAdmin(admin.ModelAdmin):
     list_display = ("name", "link", "duration", "pub_date")
     search_fields = ("name",)
     list_filter = ('name',)
+    filter_horizontal = ('product',)
 
 
 @admin.register(Product)
@@ -30,7 +31,6 @@ class ProductAdmin(admin.ModelAdmin):
 
 @admin.register(Watched)
 class WatchedAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'lesson', 'time', 'if_watched', )
-    search_fields = ('user', 'lesson')
-    list_filter = ('user',)
+    list_display = ('id', 'user', 'time', 'if_watched', 'lesson', 'last_watched')
+    list_filter = ('user','lesson')
 

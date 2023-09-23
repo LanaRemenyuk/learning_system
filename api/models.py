@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib import admin
 from django.db import models
 from django.db.models import DateTimeField
 from django.db.models.deletion import CASCADE
@@ -47,7 +46,8 @@ class Product(models.Model):
         verbose_name='Product owner',
         help_text='Specify the product owner'
     )
-    subscriber = models.ManyToManyField(CustomUser)
+    subscriber = models.ManyToManyField(CustomUser,
+                                        verbose_name='Subscriber',)
     description = models.TextField(
         verbose_name='Product description',
         help_text='Describe the product', )
@@ -70,8 +70,7 @@ class Product(models.Model):
 
 
 class Lesson(models.Model):
-    product = models.ForeignKey(Product, related_name="lessons",
-                                on_delete=CASCADE,
+    product = models.ManyToManyField(Product, related_name="lessons",
                                 verbose_name='Product',
                                 help_text='Specify the product name'
                                     )
@@ -83,9 +82,7 @@ class Lesson(models.Model):
         db_index=True,
         unique=True,
     )
-    duration = models.DurationField(
-
-    )
+    duration = models.DurationField()
     pub_date = DateTimeField(
         verbose_name='Pub date',
         auto_now_add=True,
@@ -113,7 +110,10 @@ class Watched(models.Model):
     )
     time = models.DurationField()
     if_watched = models.BooleanField()
+    last_watched = models.DateTimeField()
 
+    def __str__(self):
+        return self.lesson.name
 
 
 

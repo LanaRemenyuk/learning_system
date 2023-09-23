@@ -3,12 +3,12 @@ from django.shortcuts import get_object_or_404
 from djoser.views import UserViewSet
 from .models import CustomUser, Lesson, Product, Watched
 from .permissions import IsOwnerAdminOrReadOnly
-from rest_framework import filters, permissions, status, viewsets
-from rest_framework.decorators import action, api_view
+from rest_framework import permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
-from .serializers import CustomUserSerializer, CustomUserCreateSerializer, LessonSerializer, WatchedSerializer
-from django.db.models import Sum, Count
+from .serializers import CustomUserSerializer, ProductSerializer, LessonSerializer, WatchedSerializer
 from django.http import JsonResponse
+
 
 class CustomUserViewSet(UserViewSet):
     queryset = CustomUser.objects.all()
@@ -42,7 +42,6 @@ class CustomUserViewSet(UserViewSet):
         return Response(f'You added {product}',
                         status=status.HTTP_201_CREATED)
 
-
     def delete_prod(self, request, id):
         user = request.user
         owner = get_object_or_404(CustomUser, id=id)
@@ -59,37 +58,38 @@ class LessonViewSet(viewsets.ModelViewSet):
     serializer_class = LessonSerializer
     permission_classes = (IsOwnerAdminOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('product')
 
 
 class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Lesson.objects.all()
-    serializer_class = LessonSerializer
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
     permission_classes = (IsOwnerAdminOrReadOnly,)
+    filterset_fields = ('name')
 
 
 class WatchedViewSet(viewsets.ModelViewSet):
     queryset = Watched.objects.all()
     serializer_class = WatchedSerializer
     permission_classes = (IsOwnerAdminOrReadOnly,)
+    filterset_fields = ('product', 'username')
 
 
 def get_stat(request):
     total_watched = Lesson.objects.filter(watched__if_watched='True').count()
-    #total_students = Product.objects.all().aggregate(Count('subscriber')).values
     total_students = Product.objects.filter(subscriber__product=True).count()
     users_number = CustomUser.objects.count()
     sales_percentage = round(total_students/users_number*100)
-    #time_spent =Lesson.objects.filter(sum(watched__time=sum()))
+    tesst = Watched.objects.filter(time__isnull=False)
+    count = 0
+    for i in tesst:
+        count += i.time.total_seconds()
     response = {
-        #'product_name': product_name,
         'total_watched': total_watched,
         'total_students': total_students,
         'users_number': users_number,
         'sales_percentage': sales_percentage,
-        #'time_spent': time_spent
+        'count': int(count)
     }
-
     return JsonResponse(response)
 
 

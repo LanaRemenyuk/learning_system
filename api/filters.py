@@ -8,3 +8,5 @@ class LessonFilter(FilterSet):
     class Meta:
         model = Lesson
         fields = ('product', )
+
+
